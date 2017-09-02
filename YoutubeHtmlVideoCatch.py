@@ -8,9 +8,13 @@ from bs4 import BeautifulSoup
 import urllib.request
 import os
 import sys
+import MySQLdb
 import ssl
 # 设置 全局取消证书验证 http://blog.csdn.net/moonhillcity/article/details/52767999
 ssl._create_default_https_context = ssl._create_unverified_context
+
+default_save_video_path = '/Users/Vbon/Desktop/YoutubeDL/'
+video_init_url = 'https://www.youtube.com/watch?v=Zbdjk_Bv4yg'
 
 def downloadpage(url):
     fp = urllib.request.urlopen(url)
@@ -32,8 +36,10 @@ def parsehtml(data):
     #
     #
     # print(url_watch_list)
-    ss_file_path = cur_file_dir() + '/You_dl_exc.sh'
-    exc = 'bash ' + ss_file_path
+    # ss_file_path = cur_file_dir() + '/You_dl_exc.sh'
+    # exc = 'bash ' + ss_file_path
+    video_url = 'https://www.youtube.com/watch\?v\=Zbdjk_Bv4yg'
+    exc = 'youtube-dl --proxy 127.0.0.1:1087 -o ' + default_save_video_path + '"%(title)s.%(ext)s" ' + video_url
     print(os.system(exc))
 
 
@@ -48,7 +54,7 @@ def cur_file_dir():
          return os.path.dirname(path)
 
 if __name__ == "__main__":
-    parsehtml(downloadpage('https://www.youtube.com/watch?v=Zbdjk_Bv4yg'))
+    parsehtml(downloadpage(video_init_url))
     # parsehtml("""
     # <a href="www.google.com"> google.com</a>
     # <A Href="www.pythonclub.org"> PythonClub </a>

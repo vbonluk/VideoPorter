@@ -1,3 +1,1 @@
-cd /Users/Vbon/Desktop/YoutubeDL
-
-youtube-dl https://www.youtube.com/watch\?v\=Zbdjk_Bv4yg
+youtube-dl --proxy 127.0.0.1:1087 -o "/Users/Vbon/Desktop/YoutubeDL/%(title)s.%(ext)s" https://www.youtube.com/watch\?v\=Zbdjk_Bv4yg
