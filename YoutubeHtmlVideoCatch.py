@@ -70,16 +70,29 @@ def parsehtml(data):
     db_coperation_2 = Youtube_db_operation()
     db_coperation_2.db_count_data_all() # 获取数据库总数据数量
 
-    time.sleep(5) # 休息一下，以免被封ip
-    # 循环执行
-    parsehtml(downloadpage(db_coperation_2.db_select_data_isRelevanceSearch()))
+    # time.sleep(5) # 休息一下，以免被封ip
+
+    isContinue = True
+    while(isContinue):
+        unDownloadCount = db_coperation_2.db_count_unDownload_data_all()
+        # 如果数据库中视频的未下载数量超过10条则暂停获取视频url爬虫
+        if unDownloadCount < 10:
+            isContinue = False
+            # 循环执行
+            parsehtml(downloadpage(db_coperation_2.db_select_data_isRelevanceSearch()))
+        else:
+            print('未下载的视频数量过多(>10),共有未下载视频%d个，暂停爬虫'%(unDownloadCount))
+
+            video_url = db_coperation_2.db_select_data_unDownloaded()
+
+            # ss_file_path = cur_file_dir() + '/You_dl_exc.sh'
+            # exc = 'bash ' + ss_file_path
+            exc = 'youtube-dl --proxy 127.0.0.1:1087 -o ' + default_save_video_path + '"%(title)s.%(ext)s" ' + video_url + ' --exec \'python3 /Users/Vbon/Documents/VideoPorter/update_video_download_status.py \'' + video_url + '\'\''
+            print(os.system(exc))
 
 
-    # ss_file_path = cur_file_dir() + '/You_dl_exc.sh'
-    # exc = 'bash ' + ss_file_path
-    # video_url = 'https://www.youtube.com/watch\?v\=Zbdjk_Bv4yg'
-    # exc = 'youtube-dl --proxy 127.0.0.1:1087 -o ' + default_save_video_path + '"%(title)s.%(ext)s" ' + video_url
-    # print(os.system(exc))
+            time.sleep(5)  # 休息一下
+
 
 
 #获取脚本文件的当前路径

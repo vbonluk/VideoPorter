@@ -10,7 +10,7 @@ import time
   `Youtube_video_url` varchar(255) NOT NULL COMMENT 'Youtube_video_url',
   `isDownloaded` INT NOT NULL COMMENT DEFAULT 0 '是否下载过',
   `isUploaded` INT NOT NULL DEFAULT 0 COMMENT '是否上传过',
-  `duration` DOUBLE NOT NULL DEFAULT '0.00' COMMENT '时长',
+  `duration` DOUBLE NOT NULL DEFAULT '0.00' COMMENT '是否在下载',
   `isUnavailable` INT NOT NULL DEFAULT 0 COMMENT '是否不可用',
   `time` varchar(255) NOT NULL DEFAULT '0' COMMENT '生成此条数据的时间',
   `time_str` varchar(255) NOT NULL DEFAULT '0' COMMENT '生成此条数据的时间',
@@ -99,9 +99,10 @@ class Youtube_db_operation:
             # 修改数据
             sql = "UPDATE Youtube_video SET isUnavailable = '1' WHERE Youtube_video_url = '%s' "
             data = (url)
-            cursor.execute(sql % data)
+            isSuccess = cursor.execute(sql % data)
             connect.commit()
-            print('成功将1条数据' + url + '标识为已经关联搜索过 isUnavailable = 1')
+            if isSuccess == 1:
+                print('成功将1条数据' + url + '标识为已经关联搜索过 isUnavailable = 1')
 
             # 关闭连接
             cursor.close()
@@ -126,6 +127,22 @@ class Youtube_db_operation:
 
         return Youtube_video_url
 
+    def db_select_data_unDownloaded(self):
+
+        connect = self.connDB()
+        # 获取游标
+        cursor = connect.cursor()
+
+        # 查询数据
+        sql = "SELECT Youtube_video_url FROM Youtube_video WHERE isDownloaded = '0'"
+        cursor.execute(sql)
+        Youtube_video_url = cursor.fetchone()[0]
+
+        # 关闭连接
+        cursor.close()
+        connect.close()
+
+        return Youtube_video_url
 
     def db_select_data_all(self):
         print()
@@ -146,3 +163,24 @@ class Youtube_db_operation:
         # 关闭连接
         cursor.close()
         connect.close()
+
+        return Count_url
+
+    def db_count_unDownload_data_all(self):
+
+        connect = self.connDB()
+        # 获取游标
+        cursor = connect.cursor()
+
+        # 查询数据
+        sql = "SELECT COUNT(*) FROM Youtube_video WHERE isDownloaded = '0'"
+        cursor.execute(sql)
+        Count_url = cursor.fetchone()[0]
+
+        print('当前数据总数：%s条' % (Count_url))
+
+        # 关闭连接
+        cursor.close()
+        connect.close()
+
+        return Count_url
