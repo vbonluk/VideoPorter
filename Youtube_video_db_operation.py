@@ -164,7 +164,7 @@ class Youtube_db_operation:
         cursor.execute(sql)
         Count_url = cursor.fetchone()[0]
 
-        print('当前数据总数：%s条' % (Count_url))
+        print('当前未下载数据总数：%s条' % (Count_url))
 
         # 关闭连接
         cursor.close()
