@@ -1,5 +1,6 @@
 import pymysql.cursors
 import sys
+import time
 
 
 def connDB():
@@ -28,9 +29,11 @@ def update(url=''):
         Count_url = cursor.fetchone()[0]
         if Count_url > 0:
             # 修改数据
-            sql = "UPDATE Youtube_video SET isDownloaded = '1' WHERE Youtube_video_url = '%s' "
-            data = (url)
-            isSuccess = cursor.execute(sql % data)
+            sql = "UPDATE Youtube_video_mark SET isDownloaded = 1,downloadTime = %d,downloadTimeStr = '%s' WHERE Youtube_video_url = '%s' "
+            system_time_format = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+            data = (time.time(),system_time_format,url)
+            sql_full = sql % data
+            isSuccess = cursor.execute(sql_full)
             connect.commit()
             if isSuccess == 1:
                 print('成功下载1条数据' + url + ' isDownloaded = 1')

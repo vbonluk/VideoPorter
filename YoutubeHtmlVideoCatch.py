@@ -43,17 +43,19 @@ def parsehtml(data):
     url_watch_list = []
     for x in soup.findAll('a'):
         a_href = x.attrs['href']
+        title = soup.title.string
+        title = ''# 暂时无法获取每个链接的名称传空值
         if 'https://www.youtube.com/watch' in a_href:
             if a_href not in url_watch_list:
-                url_watch_list.append(a_href)
+                url_watch_list.append([title,a_href])
         else:
             if '/watch' in a_href:
                 full_href = 'https://www.youtube.com' + a_href
                 if full_href not in url_watch_list:
-                    url_watch_list.append(full_href)
+                    url_watch_list.append([title,full_href])
 
     insert_success_count = 0
-    for url_str in url_watch_list:
+    for [title ,url_str] in url_watch_list:
         if url_str == '':
             continue
         else:
@@ -62,7 +64,7 @@ def parsehtml(data):
             if isExist >= 1:
                 print('数据库已存在:' + url_str + ',不插入此条数据')
             else:
-                db_coperation.db_insert_data(url_str)
+                db_coperation.db_insert_data(url = url_str,name = title)
                 insert_success_count += 1
     print('成功往数据库插入新数据：%d条' %(insert_success_count))
 

@@ -16,18 +16,8 @@ connect = pymysql.Connect(
 # 获取游标
 cursor = connect.cursor()
 
-'''
-  数据库Youtube_video表
-  `id` int(4) unsigned NOT NULL AUTO_INCREMENT,
-  `Youtube_video_url` varchar(255) NOT NULL COMMENT 'Youtube_video_url',
-  `isDownloaded` INT NOT NULL COMMENT '是否下载过',
-  `isUploaded` INT NOT NULL DEFAULT '0.00' COMMENT '是否上传过',
-  `duration` DOUBLE NOT NULL DEFAULT '0.00' COMMENT '时长',
-  `isUnavailable` INT NOT NULL DEFAULT '0.00' COMMENT '是否不可用',
-'''
-
 # 插入数据
-sql = "INSERT INTO Youtube_video (Youtube_video_url, isDownloaded, isUploaded) VALUES ( '%s', '%d', %d )"
+sql = "INSERT INTO Youtube_video_mark (Youtube_video_url, isDownloaded, isUploaded) VALUES ( '%s', '%d', %d )"
 data = ('https://www.youtube.com/watch?v=Zbdjk_Bv4yg', 0, 0)
 cursor.execute(sql % data)
 connect.commit()

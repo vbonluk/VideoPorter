@@ -4,19 +4,6 @@
 import pymysql.cursors
 import time
 
-'''
-  数据库Youtube_video表
-  `id` int(4) unsigned NOT NULL AUTO_INCREMENT,
-  `Youtube_video_url` varchar(255) NOT NULL COMMENT 'Youtube_video_url',
-  `isDownloaded` INT NOT NULL COMMENT DEFAULT 0 '是否下载过',
-  `isUploaded` INT NOT NULL DEFAULT 0 COMMENT '是否上传过',
-  `duration` DOUBLE NOT NULL DEFAULT '0.00' COMMENT '是否在下载',
-  `isUnavailable` INT NOT NULL DEFAULT 0 COMMENT '是否不可用',
-  `time` varchar(255) NOT NULL DEFAULT '0' COMMENT '生成此条数据的时间',
-  `time_str` varchar(255) NOT NULL DEFAULT '0' COMMENT '生成此条数据的时间',
-'''
-
-
 class Youtube_db_operation:
 
     def __init__(self):
@@ -35,7 +22,7 @@ class Youtube_db_operation:
         return connect
 
 
-    def db_insert_data(self,url=''):
+    def db_insert_data(self,url='',name=''):
         if url == '':
             print('url is empty , insert failure')
             return
@@ -45,11 +32,11 @@ class Youtube_db_operation:
             cursor = connect.cursor()
 
             # 插入数据
-            sql = "INSERT INTO Youtube_video (Youtube_video_url, isDownloaded, isUploaded, time, time_str) VALUES ( '%s', '%d', %d , '%s','%s')"
-            system_time = time.time()
+            sql = "INSERT INTO Youtube_video_mark (Youtube_video_name,Youtube_video_url, isDownloaded, isUploaded, size, time, timeStr, isUnavailable, downloadTime, downloadTimeStr, uploadTime, uploadTimeStr, searchTime, searchTimeStr) VALUES ( '%s', '%s', %d, %d, %d, %d, '%s', %d, %d, '%s', %d, '%s', %d, '%s')"
             system_time_format = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            data = (url, 0, 0, system_time, system_time_format)
-            cursor.execute(sql % data)
+            data = (name, url, 0, 0, 0, 0, '0', 0, 0, '0', 0, '0', time.time(), system_time_format)
+            sql_full = sql % data
+            cursor.execute(sql_full)
             connect.commit()
 
             # 关闭连接
@@ -70,7 +57,7 @@ class Youtube_db_operation:
             cursor = connect.cursor()
 
             # 查询数据
-            sql = "SELECT id FROM Youtube_video WHERE Youtube_video_url = '%s' "
+            sql = "SELECT id FROM Youtube_video_mark WHERE Youtube_video_url = '%s' "
             data = (url)
             cursor.execute(sql % data)
             url_list = []
@@ -97,7 +84,7 @@ class Youtube_db_operation:
             cursor = connect.cursor()
 
             # 修改数据
-            sql = "UPDATE Youtube_video SET isUnavailable = '1' WHERE Youtube_video_url = '%s' "
+            sql = "UPDATE Youtube_video_mark SET isUnavailable = 1 WHERE Youtube_video_url = '%s' "
             data = (url)
             isSuccess = cursor.execute(sql % data)
             connect.commit()
@@ -115,7 +102,7 @@ class Youtube_db_operation:
         cursor = connect.cursor()
 
         # 查询数据
-        sql = "SELECT Youtube_video_url FROM Youtube_video WHERE isUnavailable = '0'"
+        sql = "SELECT Youtube_video_url FROM Youtube_video_mark WHERE isUnavailable = 0"
         cursor.execute(sql)
         Youtube_video_url = cursor.fetchone()[0]
 
@@ -134,7 +121,7 @@ class Youtube_db_operation:
         cursor = connect.cursor()
 
         # 查询数据
-        sql = "SELECT Youtube_video_url FROM Youtube_video WHERE isDownloaded = '0'"
+        sql = "SELECT Youtube_video_url FROM Youtube_video_mark WHERE isDownloaded = 0"
         cursor.execute(sql)
         Youtube_video_url = cursor.fetchone()[0]
 
@@ -154,7 +141,7 @@ class Youtube_db_operation:
         cursor = connect.cursor()
 
         # 查询数据
-        sql = "SELECT COUNT(*) FROM Youtube_video"
+        sql = "SELECT COUNT(*) FROM Youtube_video_mark"
         cursor.execute(sql)
         Count_url = cursor.fetchone()[0]
 
@@ -173,7 +160,7 @@ class Youtube_db_operation:
         cursor = connect.cursor()
 
         # 查询数据
-        sql = "SELECT COUNT(*) FROM Youtube_video WHERE isDownloaded = '0'"
+        sql = "SELECT COUNT(*) FROM Youtube_video_mark WHERE isDownloaded = 0"
         cursor.execute(sql)
         Count_url = cursor.fetchone()[0]
 
