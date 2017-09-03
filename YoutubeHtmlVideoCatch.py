@@ -66,8 +66,12 @@ def parsehtml(data):
                 insert_success_count += 1
     print('成功往数据库插入新数据：%d条' %(insert_success_count))
 
-    # 循环执行
+
     db_coperation_2 = Youtube_db_operation()
+    db_coperation_2.db_count_data_all() # 获取数据库总数据数量
+
+    time.sleep(5) # 休息一下，以免被封ip
+    # 循环执行
     parsehtml(downloadpage(db_coperation_2.db_select_data_isRelevanceSearch()))
 
 

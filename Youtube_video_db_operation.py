@@ -14,7 +14,6 @@ import time
   `isUnavailable` INT NOT NULL DEFAULT 0 COMMENT '是否不可用',
   `time` varchar(255) NOT NULL DEFAULT '0' COMMENT '生成此条数据的时间',
   `time_str` varchar(255) NOT NULL DEFAULT '0' COMMENT '生成此条数据的时间',
-  `isRelevanceSearch` INT NOT NULL DEFAULT 0 COMMENT '是否被关联搜索过',
 '''
 
 
@@ -46,10 +45,10 @@ class Youtube_db_operation:
             cursor = connect.cursor()
 
             # 插入数据
-            sql = "INSERT INTO Youtube_video (Youtube_video_url, isDownloaded, isUploaded, time, time_str,isRelevanceSearch) VALUES ( '%s', %d, %d , '%s','%s',%d)"
+            sql = "INSERT INTO Youtube_video (Youtube_video_url, isDownloaded, isUploaded, time, time_str) VALUES ( '%s', '%d', %d , '%s','%s')"
             system_time = time.time()
-            system_time_format = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
-            data = (url, 0, 0,system_time,system_time_format,0)
+            system_time_format = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+            data = (url, 0, 0, system_time, system_time_format)
             cursor.execute(sql % data)
             connect.commit()
 
@@ -88,6 +87,26 @@ class Youtube_db_operation:
             else:
                 return 0
 
+    def db_update_data_Relevance(self, url=''):
+        if url == '':
+            print('url is empty , update failure')
+            return
+        else:
+            connect = self.connDB()
+            # 获取游标
+            cursor = connect.cursor()
+
+            # 修改数据
+            sql = "UPDATE Youtube_video SET isUnavailable = '1' WHERE Youtube_video_url = '%s' "
+            data = (url)
+            cursor.execute(sql % data)
+            connect.commit()
+            print('成功将1条数据' + url + '标识为已经关联搜索过 isUnavailable = 1')
+
+            # 关闭连接
+            cursor.close()
+            connect.close()
+
     def db_select_data_isRelevanceSearch(self):
 
         connect = self.connDB()
@@ -95,16 +114,35 @@ class Youtube_db_operation:
         cursor = connect.cursor()
 
         # 查询数据
-        sql = "SELECT Youtube_video_url FROM Youtube_video WHERE isRelevanceSearch = 0"
+        sql = "SELECT Youtube_video_url FROM Youtube_video WHERE isUnavailable = '0'"
         cursor.execute(sql)
-        Youtube_video_url = cursor.fetchall()[0]
+        Youtube_video_url = cursor.fetchone()[0]
 
         # 关闭连接
         cursor.close()
         connect.close()
+
+        self.db_update_data_Relevance(Youtube_video_url)
 
         return Youtube_video_url
 
 
     def db_select_data_all(self):
         print()
+
+    def db_count_data_all(self):
+
+        connect = self.connDB()
+        # 获取游标
+        cursor = connect.cursor()
+
+        # 查询数据
+        sql = "SELECT COUNT(*) FROM Youtube_video"
+        cursor.execute(sql)
+        Count_url = cursor.fetchone()[0]
+
+        print('当前数据总数：%s条'%(Count_url))
+
+        # 关闭连接
+        cursor.close()
+        connect.close()
