@@ -1,4 +1,4 @@
-#!/usr/bin/env python  
+#!/usr/bin/env python3
 # coding=utf-8
 
 # BeautifulSoup是第三方库，不过功能更强大，代码量更少。文档请参考
@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import urllib.request
 import os
 import sys
-import MySQLdb
+from Youtube_video_db_operation import *
 import ssl
 # 设置 全局取消证书验证 http://blog.csdn.net/moonhillcity/article/details/52767999
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -17,30 +17,65 @@ default_save_video_path = '/Users/Vbon/Desktop/YoutubeDL/'
 video_init_url = 'https://www.youtube.com/watch?v=Zbdjk_Bv4yg'
 
 def downloadpage(url):
+
     fp = urllib.request.urlopen(url)
     data = fp.read()
     fp.close()
+
+    # proxy_handler = urllib.request.ProxyHandler({'http': 'http://127.0.0.1:1087'})
+    # opener = urllib.request.build_opener(proxy_handler)
+    # r = opener.open(url)
+    # data = r.read()
+    # opener.close()
+
+    # proxy_support = urllib.request.ProxyHandler({'http': 'localhost:1087'})
+    # opener = urllib.request.build_opener(proxy_support)
+    # urllib.request.install_opener(opener)
+    # aa = urllib.request.urlopen(url)
+    # data = aa.read()
+    # print(data)
+
     return data
 
 
 def parsehtml(data):
-    # soup = BeautifulSoup(data,'lxml')
-    # url_watch_list = []
-    # for x in soup.findAll('a'):
-    #     a_href = x.attrs['href']
-    #     if 'https://www.youtube.com/watch' in a_href:
-    #         url_watch_list.append(a_href)
-    #     else:
-    #         if '/watch' in a_href:
-    #             url_watch_list.append('https://www.youtube.com' + a_href)
-    #
-    #
-    # print(url_watch_list)
+    soup = BeautifulSoup(data,'lxml')
+    url_watch_list = []
+    for x in soup.findAll('a'):
+        a_href = x.attrs['href']
+        if 'https://www.youtube.com/watch' in a_href:
+            if a_href not in url_watch_list:
+                url_watch_list.append(a_href)
+        else:
+            if '/watch' in a_href:
+                full_href = 'https://www.youtube.com' + a_href
+                if full_href not in url_watch_list:
+                    url_watch_list.append(full_href)
+
+    insert_success_count = 0
+    for url_str in url_watch_list:
+        if url_str == '':
+            continue
+        else:
+            db_coperation = Youtube_db_operation()
+            isExist = db_coperation.db_select_data_repeat(url_str)
+            if isExist >= 1:
+                print('数据库已存在:' + url_str + ',不插入此条数据')
+            else:
+                db_coperation.db_insert_data(url_str)
+                insert_success_count += 1
+    print('成功往数据库插入新数据：%d条' %(insert_success_count))
+
+    # 循环执行
+    db_coperation_2 = Youtube_db_operation()
+    parsehtml(downloadpage(db_coperation_2.db_select_data_isRelevanceSearch()))
+
+
     # ss_file_path = cur_file_dir() + '/You_dl_exc.sh'
     # exc = 'bash ' + ss_file_path
-    video_url = 'https://www.youtube.com/watch\?v\=Zbdjk_Bv4yg'
-    exc = 'youtube-dl --proxy 127.0.0.1:1087 -o ' + default_save_video_path + '"%(title)s.%(ext)s" ' + video_url
-    print(os.system(exc))
+    # video_url = 'https://www.youtube.com/watch\?v\=Zbdjk_Bv4yg'
+    # exc = 'youtube-dl --proxy 127.0.0.1:1087 -o ' + default_save_video_path + '"%(title)s.%(ext)s" ' + video_url
+    # print(os.system(exc))
 
 
 #获取脚本文件的当前路径
